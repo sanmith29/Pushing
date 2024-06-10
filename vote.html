@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Management</title>
+    <style>
+        /* Your existing CSS styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-image: linear-gradient(255deg, rgba(77, 77, 77,0.05) 0%, rgba(77, 77, 77,0.05) 25%,rgba(42, 42, 42,0.05) 25%, rgba(42, 42, 42,0.05) 38%,rgba(223, 223, 223,0.05) 38%, rgba(223, 223, 223,0.05) 75%,rgba(36, 36, 36,0.05) 75%, rgba(36, 36, 36,0.05) 100%),linear-gradient(83deg, rgba(128, 128, 128,0.05) 0%, rgba(128, 128, 128,0.05) 34%,rgba(212, 212, 212,0.05) 34%, rgba(212, 212, 212,0.05) 57%,rgba(25, 25, 25,0.05) 57%, rgba(25, 25, 25,0.05) 89%,rgba(135, 135, 135,0.05) 89%, rgba(135, 135, 135,0.05) 100%),linear-gradient(280deg, rgba(55, 55, 55,0.05) 0%, rgba(55, 55, 55,0.05) 14%,rgba(209, 209, 209,0.05) 14%, rgba(209, 209, 209,0.05) 60%,rgba(245, 245, 245,0.05) 60%, rgba(245, 245, 245,0.05) 69%,rgba(164, 164, 164,0.05) 69%, rgba(164, 164, 164,0.05) 100%),linear-gradient(288deg, rgba(248, 248, 248,0.05) 0%, rgba(248, 248, 248,0.05) 32%,rgba(148, 148, 148,0.05) 32%, rgba(148, 148, 148,0.05) 35%,rgba(202, 202, 202,0.05) 35%, rgba(202, 202, 202,0.05) 51%,rgba(181, 181, 181,0.05) 51%, rgba(181, 181, 181,0.05) 100%),linear-gradient(131deg, hsl(214,0%,11%),hsl(214,0%,11%));
+            display: grid;
+            gap: 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            -webkit-backdrop-filter: blur(40px);
+            backdrop-filter: blur(40px);
+            box-shadow: 0 0 5px rgb(244, 244, 246);
+        }
+
+        #nav {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .container:hover {
+            border: 1px solid #dcc580;
+            box-shadow: 0 0 7px #FFD700;
+        }
+
+        #nav p {
+            margin: 0;
+            color: white;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        #nav p:hover {
+            color: #ffc107;
+            border: 1px solid #FFD700;
+            border-radius: 3px;
+            padding: 5px;
+        }
+
+        #nav a {
+            text-decoration: none;
+            color: white;
+        }
+
+        #nav a:hover {
+            color: #ffc107;
+        }
+
+        #searchContainer {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        #searchIcon {
+            cursor: pointer;
+            color: white;
+            padding: 2px;
+            border-radius: 3px;
+            border: 1px solid rgb(241, 241, 248);
+        }
+
+        #searchIcon:hover {
+            border: 1px solid #ffc107;
+        }
+
+        #searchBar {
+            padding: 5px;
+            width: 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #searchBar.expanded {
+            width: 100%;
+            font-size: medium;
+            opacity: 1;
+            pointer-events: auto;
+            border: 0;
+            background: transparent;
+            color: white;
+            outline: none;
+            border-bottom: 2px solid rgb(255 255 255 / 5%);
+            transition: 0.3s;
+        }
+
+        .member-details {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: transparent;
+            color: white;
+            outline: none;
+            transition: 0.3s;
+            position: relative; /* For positioning the remove button */
+        }
+
+        .profile-photo {
+            flex: 0 0 70px;
+            height: 70px;
+            width: 70px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #666;
+            box-shadow: 0 0 10px #6B6967;
+        }
+
+        .member-details-content {
+            flex: 1;
+        }
+
+        .member-details-content p {
+            margin-bottom: 10px; /* Add space below each detail */
+        }
+
+        .member-details-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .remove-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .member-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            -webkit-backdrop-filter: blur(100%);
+            backdrop-filter: blur(100%);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .member-form label {
+            flex: 1 0 100%;
+            color: white;
+            margin-bottom: 5px; /* Added margin for spacing */
+        }
+
+        .member-form input[type="text"],
+        .member-form input[type="date"],
+        .member-form input[type="email"] {
+            flex: 1 0 100%;
+            padding: 5px;
+            background: transparent;
+            color: white;
+            outline: none;
+            border: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.5); /* Adjusted border style */
+            transition: 0.3s;
+        }
+
+        .member-form button {
+            flex: 1 0 100%;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px; /* Added margin for spacing */
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="container">
+            <section id="nav">
+                <p id="addMemberBtn">Add</p>
+                <p><a href="create-group.html" id="addGroupBtn">Add Group</a></p>
+                <p><a href="groups_list.html" id="conductVoteBtn">Groups</a></p>
+                <p><a href="newVote.html" id="voteButton">Vote</a></p>
+                <p><a href="results.html" id="backButton">Result</a></p>
+                <span id="searchIcon">&#128269;</span>
+            </section>
+            <div id="searchContainer">
+                <input type="text" id="searchBar" placeholder="Search...">
+            </div>
+        </div>
+    </div>
+    <div id="memberFormContainer"></div>
+    <script>
+        document.getElementById("conductVoteBtn").addEventListener("click", function() {
+            window.location.href = "conduct-vote.html";
+        });
+
+        document.getElementById("addMemberBtn").addEventListener("click", function() {
+            createMemberForm();
+        });
+
+        document.getElementById("searchIcon").addEventListener("click", function() {
+            document.getElementById("searchBar").classList.toggle("expanded");
+            document.getElementById("searchBar").focus();
+        });
+
+        document.getElementById("voteButton").addEventListener("click", function() {
+            window.location.href = "newVote.html";
+        });
+
+        function createMemberForm() {
+            const memberForm = document.createElement('div');
+            memberForm.classList.add('member-form');
+
+            const nameLabel = document.createElement('label');
+            nameLabel.textContent = 'Name:';
+            const nameInput = document.createElement('input');
+            nameInput.setAttribute('type', 'text');
+            nameInput.setAttribute('placeholder', 'Enter name');
+
+            const dobLabel = document.createElement('label');
+            dobLabel.textContent = 'Date of Birth:';
+            const dobInput = document.createElement('input');
+            dobInput.setAttribute('type', 'date');
+
+            const emailLabel = document.createElement('label');
+            emailLabel.textContent = 'Email:';
+            const emailInput = document.createElement('input');
+            emailInput.setAttribute('type', 'email');
+            emailInput.setAttribute('placeholder', 'Enter email');
+
+            const photoLabel = document.createElement('label');
+            photoLabel.textContent = 'Profile Photo:';
+            const photoInput = document.createElement('input');
+            photoInput.setAttribute('type', 'file');
+
+            const submitButton = document.createElement('button');
+            submitButton.textContent = 'Submit';
+            submitButton.addEventListener('click', function() {
+                const name = nameInput.value;
+                const dob = dobInput.value;
+                const email = emailInput.value;
+                const photo = photoInput.files[0];
+                saveMemberDetails(name, dob, email, photo);
+                displayMemberDetails(name, dob, email, photo, memberForm);
+            });
+
+            memberForm.appendChild(photoLabel);
+            memberForm.appendChild(photoInput);
+            memberForm.appendChild(nameLabel);
+            memberForm.appendChild(nameInput);
+            memberForm.appendChild(dobLabel);
+            memberForm.appendChild(dobInput);
+            memberForm.appendChild(emailLabel);
+            memberForm.appendChild(emailInput);
+            memberForm.appendChild(submitButton);
+
+            document.getElementById("memberFormContainer").appendChild(memberForm);
+        }
+
+        function saveMemberDetails(name, dob, email, photo) {
+            const member = {
+                name: name,
+                dob: dob,
+                email: email,
+                photo: photo ? photo.name : null
+            };
+
+            let members = JSON.parse(localStorage.getItem('members')) || [];
+            members.push(member);
+            localStorage.setItem('members', JSON.stringify(members));
+        }
+
+        function loadMemberDetails() {
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            members.forEach(member => {
+                displayMemberDetails(member.name, member.dob, member.email, member.photo);
+            });
+        }
+
+        function displayMemberDetails(name, dob, email, photo, memberForm) {
+            const memberDetails = document.createElement('div');
+            memberDetails.classList.add('member-details');
+
+            const profilePhoto = document.createElement('div');
+            profilePhoto.classList.add('profile-photo');
+            if (photo) {
+                const img = document.createElement('img');
+                img.src = photo;
+                profilePhoto.appendChild(img);
+            } else {
+                const firstLetter = name.charAt(0).toUpperCase();
+                profilePhoto.textContent = firstLetter;
+            }
+
+            const detailsContainer = document.createElement('div');
+            detailsContainer.classList.add('member-details-content');
+
+            const nameElement = document.createElement('p');
+            nameElement.innerHTML = `<strong>Name:</strong> ${name}`;
+
+            const dobElement = document.createElement('p');
+            dobElement.innerHTML = `<strong>Date of Birth:</strong> ${dob}`;
+
+            const emailElement = document.createElement('p');
+            emailElement.innerHTML = `<strong>Email:</strong> ${email}`;
+
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.classList.add('remove-button');
+            removeButton.addEventListener('click', function() {
+                removeMemberDetails(name);
+                memberDetails.remove();
+            });
+
+            detailsContainer.appendChild(nameElement);
+            detailsContainer.appendChild(dobElement);
+            detailsContainer.appendChild(emailElement);
+
+            memberDetails.appendChild(profilePhoto);
+            memberDetails.appendChild(detailsContainer);
+            memberDetails.appendChild(removeButton);
+
+            const existingMemberDetails = document.querySelectorAll('.member-details');
+            if (existingMemberDetails.length > 0) {
+                const firstMemberDetail = existingMemberDetails[0];
+                firstMemberDetail.parentNode.insertBefore(memberDetails, firstMemberDetail);
+            } else {
+                document.getElementById("memberFormContainer").appendChild(memberDetails);
+            }
+
+            if (memberForm) {
+                memberForm.remove();
+            }
+        }
+
+        function removeMemberDetails(name) {
+            let members = JSON.parse(localStorage.getItem('members')) || [];
+            members = members.filter(member => member.name !== name);
+            localStorage.setItem('members', JSON.stringify(members));
+        }
+
+        const searchBar = document.getElementById("searchBar");
+        searchBar.addEventListener("keyup", function() {
+            const searchValue = searchBar.value.toLowerCase();
+            const memberForms = document.querySelectorAll(".member-details");
+            memberForms.forEach(function(form) {
+                const name = form.querySelector(".member-details-content p:first-child").textContent.toLowerCase();
+                if (name.includes(searchValue)) {
+                    form.style.display = "flex";
+                } else {
+                    form.style.display = "none";
+                }
+            });
+        });
+
+        window.addEventListener('load', function() {
+            loadMemberDetails();
+        });
+    </script>
+</body>
+</html>

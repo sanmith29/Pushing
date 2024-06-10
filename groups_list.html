@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groups List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            background-image: linear-gradient(346deg, rgba(55, 55, 55,0.04) 0%, rgba(55, 55, 55,0.04) 22%,rgba(140, 140, 140,0.04) 22%, rgba(140, 140, 140,0.04) 69%,rgba(225, 225, 225,0.04) 69%, rgba(225, 225, 225,0.04) 100%),linear-gradient(31deg, rgba(55, 55, 55,0.04) 0%, rgba(55, 55, 55,0.04) 42%,rgba(140, 140, 140,0.04) 42%, rgba(140, 140, 140,0.04) 85%,rgba(225, 225, 225,0.04) 85%, rgba(225, 225, 225,0.04) 100%),linear-gradient(55deg, rgba(55, 55, 55,0.04) 0%, rgba(55, 55, 55,0.04) 13%,rgba(140, 140, 140,0.04) 13%, rgba(140, 140, 140,0.04) 72%,rgba(225, 225, 225,0.04) 72%, rgba(225, 225, 225,0.04) 100%),linear-gradient(90deg, rgb(0,0,0),rgb(0,0,0));
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+        .search-bar {
+            margin: 20px;
+        }
+        .search-input {
+            padding: 10px;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 5px;
+            border-top: 0;
+            border-left: 0;
+            border-right: 0;
+            background:transparent;
+            color:white;
+            outline:none;
+            border-bottom: 2px solid rgb(255 255 255 / 5%);
+            transition:0.3s;
+        }
+        .group-list {
+            width: 80%;
+            max-width: 800px;
+            list-style: none;
+            padding: 0;
+        }
+        .group-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background: transparent;
+            box-shadow: 0 0 4px rgba(244, 243, 243, 0.1);
+        }
+        .group-item div {
+            display: flex;
+            align-items: center;
+        }
+        .group-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 10px;
+            color: #ccc;
+        }
+        .group-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .group-details {
+            display: flex;
+            flex-direction: column;
+            color: #ccc;
+        }
+        .group-details p {
+            margin: 0;
+        }
+        .remove-button {
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button id="back">Home</button>
+    <button id="group">Create group</button>
+    <div class="search-bar">
+        <input id="searchInput" class="search-input" type="text" placeholder="Search groups...">
+    </div>
+    <div class="container">
+        <h1>Groups List</h1>
+        <ul id="groupList" class="group-list">
+            <!-- Groups will be listed here -->
+        </ul>
+    </div>
+
+    <!-- Modal for displaying members -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Group Members</h2>
+            <ul id="memberList">
+                <!-- Members will be listed here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Function to load groups from local storage and display them
+        function loadGroups() {
+            const groupList = document.getElementById('groupList');
+            const groups = JSON.parse(localStorage.getItem('groups')) || [];
+
+            groups.forEach((group, index) => {
+                createGroupItem(group, index);
+            });
+        }
+
+        // Function to create a group item
+        function createGroupItem(group, index) {
+            const groupList = document.getElementById('groupList');
+            const groupItem = document.createElement('li');
+            groupItem.classList.add('group-item');
+            groupItem.setAttribute('data-index', index);
+
+            const groupDetailsDiv = document.createElement('div');
+            groupDetailsDiv.classList.add('group-details-div');
+            groupDetailsDiv.addEventListener('click', function() {
+                showGroupMembers(group.name);
+            });
+
+            // Group photo
+            const photoDiv = document.createElement('div');
+            photoDiv.classList.add('group-photo');
+            if (group.photo) {
+                const img = document.createElement('img');
+                img.src = group.photo;
+                img.alt = 'Group Photo';
+                photoDiv.appendChild(img);
+            } else {
+                const firstLetter = group.name.charAt(0).toUpperCase();
+                photoDiv.textContent = firstLetter;
+                photoDiv.style.fontSize = '30px';
+                photoDiv.style.textAlign = 'center';
+                photoDiv.style.lineHeight = '50px';
+            }
+
+            // Group details
+            const detailsDiv = document.createElement('div');
+            detailsDiv.classList.add('group-details');
+            const nameElement = document.createElement('p');
+            nameElement.textContent = `Name: ${group.name}`;
+            const adminElement = document.createElement('p');
+            adminElement.textContent = `Admin: ${group.admin}`;
+
+            detailsDiv.appendChild(nameElement);
+            detailsDiv.appendChild(adminElement);
+            groupDetailsDiv.appendChild(photoDiv);
+            groupDetailsDiv.appendChild(detailsDiv);
+
+            // Remove button
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('remove-button');
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', function() {
+                removeGroup(index);
+            });
+
+            groupItem.appendChild(groupDetailsDiv);
+            groupItem.appendChild(removeButton);
+            groupList.appendChild(groupItem);
+        }
+
+        // Function to remove group from local storage and DOM
+        function removeGroup(index) {
+            let groups = JSON.parse(localStorage.getItem('groups')) || [];
+            groups.splice(index, 1);
+            localStorage.setItem('groups', JSON.stringify(groups));
+            document.querySelector(`[data-index="${index}"]`).remove();
+        }
+
+        // Function to filter groups based on search query
+        function filterGroups() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const groupItems = document.querySelectorAll('.group-item');
+
+            groupItems.forEach(item => {
+                const name = item.querySelector('.group-details p').textContent.toLowerCase();
+                if (name.includes(searchInput)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Function to show group members
+        function showGroupMembers(groupName) {
+            const memberList = document.getElementById('memberList');
+            memberList.innerHTML = ''; // Clear previous members
+
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            const groupMembers = members.filter(member => member.group === groupName);
+
+            groupMembers.forEach(member => {
+                const memberItem = document.createElement('li');
+                memberItem.textContent = `Name: ${member.name}, Role: ${member.role}`;
+                memberList.appendChild(memberItem);
+            });
+
+            // Display the modal
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'block';
+        }
+
+        // Close the modal
+        document.querySelector('.close').addEventListener('click', function() {
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'none';
+        });
+
+        // Initialize the group list
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGroups();
+
+            // Handle the back button for navigation
+            document.getElementById('back').addEventListener('click', function() {
+                window.location.href = 'vote.html';
+            });
+
+            document.getElementById('group').addEventListener('click', function() {
+                window.location.href = "create-group.html";
+            });
+
+            // Add event listener to search input
+            document.getElementById('searchInput').addEventListener('input', filterGroups);
+        });
+    </script>
+</body>
+</html>

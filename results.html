@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote Results</title>
+    <style>
+        /* Add necessary styles for the results page */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #ccc;
+            background-image: linear-gradient(255deg, rgba(77, 77, 77,0.05) 0%, rgba(77, 77, 77,0.05) 25%,rgba(42, 42, 42,0.05) 25%, rgba(42, 42, 42,0.05) 38%,rgba(223, 223, 223,0.05) 38%, rgba(223, 223, 223,0.05) 75%,rgba(36, 36, 36,0.05) 75%, rgba(36, 36, 36,0.05) 100%),linear-gradient(83deg, rgba(128, 128, 128,0.05) 0%, rgba(128, 128, 128,0.05) 34%,rgba(212, 212, 212,0.05) 34%, rgba(212, 212, 212,0.05) 57%,rgba(25, 25, 25,0.05) 57%, rgba(25, 25, 25,0.05) 89%,rgba(135, 135, 135,0.05) 89%, rgba(135, 135, 135,0.05) 100%),linear-gradient(280deg, rgba(55, 55, 55,0.05) 0%, rgba(55, 55, 55,0.05) 14%,rgba(209, 209, 209,0.05) 14%, rgba(209, 209, 209,0.05) 60%,rgba(245, 245, 245,0.05) 60%, rgba(245, 245, 245,0.05) 69%,rgba(164, 164, 164,0.05) 69%, rgba(164, 164, 164,0.05) 100%),linear-gradient(288deg, rgba(248, 248, 248,0.05) 0%, rgba(248, 248, 248,0.05) 32%,rgba(148, 148, 148,0.05) 32%, rgba(148, 148, 148,0.05) 35%,rgba(202, 202, 202,0.05) 35%, rgba(202, 202, 202,0.05) 51%,rgba(181, 181, 181,0.05) 51%, rgba(181, 181, 181,0.05) 100%),linear-gradient(131deg, hsl(214,0%,11%),hsl(214,0%,11%));
+
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background: transparent;
+            box-shadow: 0 0 15px rgba(169, 168, 168, 0.2);
+        }
+
+        h2 {
+            margin-top: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        a {
+            text-decoration: none;
+            color: #ccc;
+        }
+        
+        a:hover {
+            color: #ffc107;
+            border: 1px solid #FFD700;
+            border-radius: 3px;
+            padding: 5px;
+        }
+
+        .thank-you {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .vote-results {
+            margin-top: 20px;
+        }
+
+        .vote-result {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: transparent;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+        }
+
+        .profile-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #666;
+            overflow: hidden;
+        }
+
+        .profile-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .vote-result-content {
+            flex: 1;
+        }
+
+        .vote-result-content p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .search-bar {
+            width: 100%;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: transparent;
+            border: 0;
+            outline: none;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p><a href="vote.html" id="backButton">Back</a></p>
+        <h2>Vote Results</h2>
+        <input type="text" class="search-bar" id="searchBar" placeholder="Search members...">
+        <div class="thank-you">Thank you for voting!</div>
+        <div class="vote-results" id="voteResultsContainer"></div>
+    </div>
+
+    <script>
+        function loadVoteResults() {
+            const votedMembers = JSON.parse(localStorage.getItem('votedMembers')) || [];
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            const voteResultsContainer = document.getElementById('voteResultsContainer');
+
+            const voteCounts = {};
+
+            // Initialize vote counts for each member
+            members.forEach(member => {
+                voteCounts[member.name] = { count: 0, photo: member.photo };
+            });
+
+            // Count votes
+            votedMembers.forEach(name => {
+                if (voteCounts[name] !== undefined) {
+                    voteCounts[name].count++;
+                }
+            });
+
+            function displayResults(filteredVoteCounts) {
+                voteResultsContainer.innerHTML = ''; // Clear previous results
+
+                for (const name in filteredVoteCounts) {
+                    const resultElement = document.createElement('div');
+                    resultElement.classList.add('vote-result');
+
+                    const profilePhoto = document.createElement('div');
+                    profilePhoto.classList.add('profile-photo');
+                    if (filteredVoteCounts[name].photo) {
+                        const img = document.createElement('img');
+                        img.src = filteredVoteCounts[name].photo;
+                        profilePhoto.appendChild(img);
+                    } else {
+                        const firstLetter = name.charAt(0).toUpperCase();
+                        profilePhoto.textContent = firstLetter;
+                    }
+
+                    const detailsContainer = document.createElement('div');
+                    detailsContainer.classList.add('vote-result-content');
+
+                    const nameElement = document.createElement('p');
+                    nameElement.textContent = `${name}: ${filteredVoteCounts[name].count} votes`;
+
+                    detailsContainer.appendChild(nameElement);
+                    resultElement.appendChild(profilePhoto);
+                    resultElement.appendChild(detailsContainer);
+
+                    voteResultsContainer.appendChild(resultElement);
+                }
+            }
+
+            displayResults(voteCounts);
+
+            document.getElementById('searchBar').addEventListener('input', function(event) {
+                const query = event.target.value.toLowerCase();
+                const filteredVoteCounts = {};
+
+                for (const name in voteCounts) {
+                    if (name.toLowerCase().includes(query)) {
+                        filteredVoteCounts[name] = voteCounts[name];
+                    }
+                }
+
+                displayResults(filteredVoteCounts);
+            });
+        }
+
+        window.addEventListener('load', function() {
+            loadVoteResults();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Group</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            background-image: linear-gradient(346deg, rgba(55, 55, 55,0.04) 0%, rgba(55, 55, 55,0.04) 22%,rgba(140, 140, 140,0.04) 22%, rgba(140, 140, 140,0.04) 69%,rgba(225, 225, 225,0.04) 69%, rgba(225, 225, 225,0.04) 100%),linear-gradient(31deg, rgba(55, 55, 55,0.04) 0%, rgba(55, 55, 55,0.04) 42%,rgba(140, 140, 140,0.04) 42%, rgba(140, 140, 140,0.04) 85%,rgba(225, 225, 225,0.04) 85%, rgba(225, 225, 225,0.04) 100%),linear-gradient(55deg, rgba(55, 55, 55,0.04) 0%, rgba(55, 55, 55,0.04) 13%,rgba(140, 140, 140,0.04) 13%, rgba(140, 140, 140,0.04) 72%,rgba(225, 225, 225,0.04) 72%, rgba(225, 225, 225,0.04) 100%),linear-gradient(90deg, rgb(0,0,0),rgb(0,0,0));
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .group-form {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="file"] {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 250px;
+            margin-bottom: 10px;
+        }
+        .group-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            background-color: #ccc;
+        }
+        .group-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <button id="back">Back</button>
+    <div class="container">
+        <h1>Create Group</h1>
+        <div id="formAndDetailsContainer">
+            <!-- Group form will be appended here -->
+        </div>
+    </div>
+
+    <script>
+        // Function to create group form
+        function createGroupForm() {
+            // Create form elements
+            const groupForm = document.createElement('div');
+            groupForm.classList.add('group-form');
+
+            const nameLabel = document.createElement('label');
+            nameLabel.textContent = 'Group Name:';
+            const nameInput = document.createElement('input');
+            nameInput.setAttribute('type', 'text');
+            nameInput.setAttribute('placeholder', 'Enter group name');
+
+            const adminLabel = document.createElement('label');
+            adminLabel.textContent = 'Admin:';
+            const adminInput = document.createElement('input');
+            adminInput.setAttribute('type', 'text');
+            adminInput.setAttribute('placeholder', 'Enter admin name');
+
+            const memberLabel = document.createElement('label');
+            memberLabel.textContent = 'Add Member:';
+            const memberInput = document.createElement('input');
+            memberInput.setAttribute('type', 'text');
+            memberInput.setAttribute('placeholder', 'Enter member name');
+
+            const photoLabel = document.createElement('label');
+            photoLabel.textContent = 'Group Photo:';
+            const photoInput = document.createElement('input');
+            photoInput.setAttribute('type', 'file');
+            photoInput.setAttribute('accept', 'image/*');
+
+            const photoPreview = document.createElement('div');
+            photoPreview.classList.add('group-photo');
+
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Save';
+            saveButton.addEventListener('click', function() {
+                const groupName = nameInput.value;
+                const adminName = adminInput.value;
+                const memberName = memberInput.value;
+                const groupPhoto = photoInput.files[0];
+
+                // Save group data to local storage
+                saveGroupData(groupName, adminName, memberName, groupPhoto);
+
+                // Redirect to groups list page
+                window.location.href = 'groups_list.html';
+            });
+
+            // Append form elements to the container
+            groupForm.appendChild(nameLabel);
+            groupForm.appendChild(nameInput);
+            groupForm.appendChild(adminLabel);
+            groupForm.appendChild(adminInput);
+            groupForm.appendChild(memberLabel);
+            groupForm.appendChild(memberInput);
+            groupForm.appendChild(photoLabel);
+            groupForm.appendChild(photoInput);
+            groupForm.appendChild(photoPreview);
+            groupForm.appendChild(saveButton);
+
+            // Preview uploaded image
+            photoInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        const img = document.createElement('img');
+                        img.src = reader.result;
+                        photoPreview.innerHTML = '';
+                        photoPreview.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            return groupForm;
+        }
+
+        // Save group data to local storage
+        function saveGroupData(groupName, adminName, memberName, groupPhoto) {
+            const groupData = {
+                name: groupName,
+                admin: adminName,
+                member: memberName,
+                photo: groupPhoto ? URL.createObjectURL(groupPhoto): null
+            };
+            let groups = JSON.parse(localStorage.getItem('groups')) || [];
+            groups.push(groupData);
+            localStorage.setItem('groups', JSON.stringify(groups));
+        }
+
+        // Initialize the form
+        document.addEventListener('DOMContentLoaded', function() {
+            const formAndDetailsContainer = document.getElementById('formAndDetailsContainer');
+            formAndDetailsContainer.appendChild(createGroupForm());
+
+            // Handle the back button for navigation
+            document.getElementById('back').addEventListener('click', function() {
+                window.location.href = 'vote.html';
+            });
+        });
+    </script>
+</body>
+</html>
